@@ -1,7 +1,12 @@
-from scripts.generate_diagrams import Activity
+from __future__ import annotations
 
+from typing import Dict, List, Sequence, Tuple, TYPE_CHECKING
 
-from typing import Dict, List, Sequence, Tuple
+if TYPE_CHECKING:  # pragma: no cover
+    try:
+        from scripts.generate_diagrams import Activity
+    except ModuleNotFoundError:  # when run directly from scripts/
+        from generate_diagrams import Activity
 
 
 def assign_events(order: Sequence[str], activities_by_name: Dict[str, Activity]) -> Tuple[Dict[int, str], List[Tuple[int, int]]]:

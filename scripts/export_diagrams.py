@@ -14,7 +14,7 @@ from typing import Sequence
 MERMAID_BLOCK = re.compile(r"```mermaid\s*(.*?)```", re.DOTALL)
 
 
-def default_mmdc_executable() -> str:
+def default_mdc_executable() -> str:
     windows_candidate = Path.home() / "AppData" / "Roaming" / "npm" / "mmdc.cmd"
     if windows_candidate.exists():
         return str(windows_candidate)
@@ -100,16 +100,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--diagrams-dir", default="diagrams", help="Directory containing the diagram files")
     parser.add_argument("--out-dir", default="docs", help="Output directory for the exported assets")
-    parser.add_argument("--pdm-file", default="pdm_network.mmd", help="PDM diagram file (.mmd or .md)")
-    parser.add_argument("--adm-file", default="adm_network.mmd", help="ADM diagram file (.mmd or .md)")
+    parser.add_argument("--pdm-file", default="pdm_network.md", help="PDM diagram file (.mmd or .md)")
+    parser.add_argument("--adm-file", default="adm_network.md", help="ADM diagram file (.mmd or .md)")
     parser.add_argument("--formats", nargs="+", default=["png"], choices=["png", "svg"], help="Formats to export")
     parser.add_argument("--backend", choices=["kroki", "mmdc"], default="mmdc", help="Rendering backend")
     parser.add_argument(
         "--mmdc-bin",
-        default=default_mmdc_executable(),
+        default=default_mdc_executable(),
         help="Path to the Mermaid CLI executable (when using the mmdc backend)",
     )
     return parser
+    sources = {
+    "pdm": diagrams_dir / args.pdm_file,
+    "adm": diagrams_dir / args.adm_file,
+}
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -125,12 +129,19 @@ def main(argv: Sequence[str] | None = None) -> None:
     }
 
     for label, path in sources.items():
-        if not path.exists():
-            raise FileNotFoundError(f"Missing diagram source: {path}")
-        for fmt in args.formats:
-            extension = "svg" if fmt == "svg" else "png"
-            target = out_dir / f"{label}_network.{extension}"
-            export_file(path, target, fmt, args.backend, args.mmdc_bin)
+    # Try .md if .mmd not found
+     if not path.exists():
+        alt = path.with_suffix(".md") if path.suffix == ".mmd" else path.with_suffix(".mmd")
+        if alt.exists():
+            path = alt
+        else:
+            raise FileNotFoundError(f"Missing diagram source: {path} or {alt}")
+
+     for fmt in args.formats:
+        extension = "svg" if fmt == "svg" else "png"
+        target = out_dir / f"{label}_network.{extension}"
+        export_file(path, target, fmt, args.backend, args.mmdc_bin)
+
 
 
 if __name__ == "__main__":

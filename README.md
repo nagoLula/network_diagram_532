@@ -13,11 +13,22 @@ Create Activity-on-Node (PDM) and Activity-on-Arrow (ADM) network diagrams direc
 
 ```bash
 python scripts/generate_diagrams.py --csv data/network_activities.csv --out-dir diagrams
-```(VS Code terminals that know about the workspace `venv` can also run the command shown above without the explicit interpreter path.)
-1. Open `diagrams/pdm_network.md` and `diagrams/adm_network.md` in the Markdown preview (`Ctrl+Shift+V`) to inspect or export the Mermaid diagrams.
+```
+
+(VS Code terminals that know about the workspace `venv` can also run the command above without the explicit interpreter path.)
+3. Render the layered ADM export for submission-ready PNG/SVG files:
+
+```bash
+python scripts/render_adm_matplotlib.py
+```
+
+The renderer reads `diagrams/adm_network.mmd` and writes `docs/adm_network.png` and `.svg` with the improved layout.
+4. Open `diagrams/pdm_network.md` and `diagrams/adm_network.md` in the Markdown preview (`Ctrl+Shift+V`) to inspect or export the Mermaid diagrams.
 
 ## Files
+
 - `scripts/generate_diagrams.py` – reads the CSV and emits the Mermaid markdown.
+- `scripts/render_adm_matplotlib.py` – layers and exports the ADM diagram when Mermaid CLI struggles.
 - `data/network_activities.csv` – authoritative activity table.
 - `diagrams/*.md` – generated diagram sources you can preview or embed elsewhere.
 

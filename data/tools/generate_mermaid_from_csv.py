@@ -19,11 +19,11 @@ csv_path = sys.argv[1] if len(sys.argv) > 1 else "data/network_activities.csv"
 out_dir = "diagrams"
 os.makedirs(out_dir, exist_ok=True)
 
-activities = {}
-edges = []
+activities: dict[str, dict[str, str | bool]] = {}
+edges: list[tuple[str, str]] = []
 
 # Helper to split predecessor field
-def split_preds(s):
+def split_preds(s: str | None) -> list[str]:
     if not s:
         return []
     s = s.strip()
@@ -47,7 +47,7 @@ with open(csv_path, newline='', encoding='utf-8') as f:
         Critical = row.get("Critical", "").strip()
 
         # Build label with safe <br> line breaks
-        label_lines = []
+        label_lines: list[str] = []
         if dur:
             label_lines.append(f"{act} ({dur})")
         else:
@@ -61,7 +61,7 @@ with open(csv_path, newline='', encoding='utf-8') as f:
         label = "<br>".join(label_lines)
 
         activities[act] = {
-            "label": label,
+            "label": str(label),
             "critical": Critical.lower() in ("yes", "true", "1")
         }
 
@@ -77,7 +77,8 @@ lines.append('    classDef critical fill=#ffcccc,stroke=#ff0000,stroke-width=2px
 # Nodes
 for act, info in activities.items():
     # Escape double quotes in label
-    safe_label = info["label"].replace('"', '\\"')
+    label_str: str = info["label"]  # type: ignore
+    safe_label = label_str.replace('"', '\\"')
     node_line = f'    {act}["{safe_label}"]'
     if info["critical"]:
         node_line += ':::critical'

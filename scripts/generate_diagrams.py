@@ -9,7 +9,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
 
-from scripts.assign_events import assign_events
+try:
+    from scripts.assign_events import assign_events
+except ModuleNotFoundError:
+    # Support running "python scripts/generate_diagrams.py" without -m
+    from assign_events import assign_events
 
 
 @dataclass
